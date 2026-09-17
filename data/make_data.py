@@ -17,6 +17,15 @@ Files produced (all in this folder):
   meter_readings_daily.csv daily kWh per meter, long format, with some gaps
   weather_forecasts.csv    temperature forecasts issued twice a day for the next 48h
                            (origin_datetime vs forecast_datetime -> leakage exercises)
+  meter_halfhourly_2023.csv.gz
+                           UK-style half-hourly settlement data for 20 meters in 2023:
+                           settlement_date (local), settlement_period (1..48; 46 on the
+                           March DST day, 50 on the October one), kwh. Planted faults:
+                           - one meter stuck at a constant value for a week (M100003, June)
+                           - one meter reporting Wh instead of kWh for a month (M100007, Sept)
+                           - one meter with a whole missing fortnight (M100011, April)
+                           - scattered missing periods, 40 duplicated rows
+                           - solar meters export (negative kwh) at midday in summer
 
 Everything is deterministic (seed=42).
 """
@@ -192,6 +201,61 @@ def make_forecasts(clean: pd.DataFrame) -> pd.DataFrame:
     return out.dropna(subset=["temp_forecast_c"]).reset_index(drop=True)
 
 
+# ----------------------------------------------------------------------------
+# 4. Half-hourly settlement-period panel for 20 meters (UK style, local time)
+# ----------------------------------------------------------------------------
+def make_halfhourly(meters: pd.DataFrame, n_meters: int = 20) -> pd.DataFrame:
+    # UTC grid covering local 2023, then settlement date/period in Europe/London
+    utc = pd.date_range("2022-12-31 22:00", "2024-01-01 02:00", freq="30min", tz="UTC")
+    local = utc.tz_convert("Europe/London")
+    grid = pd.DataFrame({"utc": utc, "settlement_date": local.date})
+    grid = grid[(grid["settlement_date"] >= pd.Timestamp("2023-01-01").date())
+                & (grid["settlement_date"] <= pd.Timestamp("2023-12-31").date())].copy()
+    grid["settlement_period"] = grid.groupby("settlement_date").cumcount() + 1
+    grid["local_hour"] = local[grid.index].hour + local[grid.index].minute / 60
+    grid["doy"] = pd.DatetimeIndex(grid["settlement_date"]).dayofyear
+    grid["dow"] = pd.DatetimeIndex(grid["settlement_date"]).dayofweek
+    grid = grid.reset_index(drop=True)
+
+    hh = grid["local_hour"].values
+    res_profile = (0.6 + 0.25 * np.exp(-((hh - 7.5) / 1.2) ** 2)
+                   + 0.9 * np.exp(-((hh - 18.5) / 2.0) ** 2))
+    sme_profile = 0.3 + 1.2 * ((hh >= 8) & (hh < 18)) * (1 - 0.3 * (grid["dow"].values >= 5))
+    season = 1 + 0.35 * np.cos(2 * np.pi * (grid["doy"].values - 15) / 365.25)
+    solar_shape = np.clip(np.sin(np.pi * (hh - 6) / 12), 0, None) ** 2
+    solar_season = 0.5 + 0.5 * -np.cos(2 * np.pi * (grid["doy"].values - 172) / 365.25 + np.pi)
+
+    sel = meters.head(n_meters)
+    frames = []
+    for _, m in sel.iterrows():
+        est = m["annual_kwh_estimate"] if not np.isnan(m["annual_kwh_estimate"]) else 3200
+        prof = sme_profile if m["customer_type"] == "sme" else res_profile
+        daily = est / 365 * season
+        kwh = daily * prof / prof.mean() / 48 * rng.lognormal(0, 0.3, len(grid))
+        if m["has_solar"]:
+            kwh = kwh - 0.9 * solar_shape * solar_season * rng.uniform(0.6, 1.0, len(grid))
+        frames.append(pd.DataFrame({
+            "meter_id": m["meter_id"],
+            "settlement_date": grid["settlement_date"].astype(str),
+            "settlement_period": grid["settlement_period"],
+            "kwh": kwh.round(3),
+        }))
+    panel = pd.concat(frames, ignore_index=True)
+    sd = pd.to_datetime(panel["settlement_date"])
+
+    # faults
+    stuck = (panel["meter_id"] == "M100003") & (sd >= "2023-06-05") & (sd < "2023-06-12")
+    panel.loc[stuck, "kwh"] = 0.187
+    wh = (panel["meter_id"] == "M100007") & (sd.dt.month == 9)
+    panel.loc[wh, "kwh"] = (panel.loc[wh, "kwh"] * 1000).round(0)
+    gap = (panel["meter_id"] == "M100011") & (sd >= "2023-04-10") & (sd < "2023-04-24")
+    panel = panel.loc[~gap]
+    panel = panel.loc[rng.random(len(panel)) > 0.001]
+    dups = panel.sample(40, random_state=5)
+    panel = pd.concat([panel, dups], ignore_index=True)
+    return panel.sample(frac=1, random_state=6).reset_index(drop=True)
+
+
 if __name__ == "__main__":
     clean = make_hourly()
     clean.to_csv(HERE / "hourly_power_clean.csv", index=False)
@@ -202,5 +266,6 @@ if __name__ == "__main__":
     readings.to_csv(HERE / "meter_readings_daily.csv", index=False)
 
     make_forecasts(clean).to_csv(HERE / "weather_forecasts.csv", index=False)
-    for f in sorted(HERE.glob("*.csv")):
+    make_halfhourly(meters).to_csv(HERE / "meter_halfhourly_2023.csv.gz", index=False, compression="gzip")
+    for f in sorted(list(HERE.glob("*.csv")) + list(HERE.glob("*.csv.gz"))):
         print(f"{f.name:28s} {f.stat().st_size/1e6:6.1f} MB")
