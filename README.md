@@ -21,6 +21,11 @@ Only NumPy, Pandas, SciPy and scikit-learn are used (plus a few matplotlib plots
 | `06_mocks/` | 18 deliberately broken research notebooks + `solutions/` | the interview simulation: open one blind, 45 minutes, find the planted bugs, leakage and questionable choices, then check the answer key |
 | `data/` | `make_data.py` + generated CSVs | shared synthetic hourly power data, customer meters, weather forecasts with origin timestamps |
 
+Every cheat-sheet notebook is written to be read without running it: each concept
+starts with a 3–6 element example, prints the input, applies one operation per cell,
+prints the result, says what to notice, and only then shows the same thing on the real
+data. Mocks are the exception: they are meant to look like a colleague's real research.
+
 Each notebook opens with "What's in here" and uses two kinds of callout:
 
 - **Pitfall:** a mistake that looks like working code.
