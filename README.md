@@ -26,6 +26,16 @@ starts with a 3–6 element example, prints the input, applies one operation per
 prints the result, says what to notice, and only then shows the same thing on the real
 data. Mocks are the exception: they are meant to look like a colleague's real research.
 
+## Exercises (`*_tests.ipynb`)
+
+Every cheat sheet has a companion `<name>_tests.ipynb` with 10–12 tasks in the
+Kaggle-Learn style. Read the task, write your solution in the cell under it (assign the
+result to the variable the task names, usually `answer`), and run the cell: the last line
+`q3.check()` prints ✅ or ❌ with a short reason. When stuck, uncomment `q3.hint()` for a
+nudge or `q3.solution()` for the reference code (`give_hint()` / `give_solution()` are
+aliases). The checker lives in `quantlearn/`; the tasks for each notebook are in
+`quantlearn/questions/`.
+
 Each notebook opens with "What's in here" and uses two kinds of callout:
 
 - **Pitfall:** a mistake that looks like working code.
