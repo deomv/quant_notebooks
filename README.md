@@ -14,7 +14,7 @@ Only NumPy, Pandas, SciPy and scikit-learn are used (plus a few matplotlib plots
 | `INTERVIEW_QA.md` | conceptual questions and short spoken answers, each pointing at the notebook with the mechanics | read the night before |
 | `01_numpy/` | arrays & dtypes · indexing/broadcasting/vectorisation · stats/linalg/random | raw array fluency, views vs copies, axis semantics, ddof, OLS by hand |
 | `02_pandas/` | Series fundamentals · load & inspect · clean/missing/dtypes · select/filter/transform · groupby/pivot · merge/join/concat · time series · pitfalls & debugging · debugging toolkit · half-hourly settlement & panel data · interactive debugging with `%debug` / `%pdb` / `breakpoint()` | the bulk of the interview: reading, cleaning, reshaping, joining, time handling, and the catalogue of things that go wrong |
-| `03_scipy/` | stats · optimize/interpolate/signal · sampling distributions, standard errors & bootstrap · hypothesis tests, power & pitfalls | hypothesis tests, distributions, curve fitting, small constrained optimisation |
+| `03_scipy/` | **stats intro from scratch** (SE, t-stats, autocorrelation, regression CIs, with the maths) · stats · optimize/interpolate/signal · sampling distributions, standard errors & bootstrap · hypothesis tests, power & pitfalls | hypothesis tests, distributions, curve fitting, small constrained optimisation |
 | `04_sklearn/` | regression workflow · preprocessing & pipelines · cross-validation for time series · diagnostics & interpretation · load-profile clustering & PCA | boring-but-correct modelling, honest evaluation, critiquing a result |
 | `05_time_series_research/` | features/targets/leakage · evaluation & baselines · end-to-end template · classical time-series stats · anomaly detection & data quality · renewables & price market EDA · statistical traps | the Fuse-style flow: define the problem, build honest features, beat the naive baseline, explain the errors |
 | `07_optimisation/` | LP dispatch · battery arbitrage · retail hedging & CVaR · curve fitting & calibration · imbalance newsvendor & quantile decisions · unit commitment MILP & scenarios | the optimisation problems an energy retailer-trader faces, with scipy.optimize (`linprog`, `milp`, `minimize`, `least_squares`) and sklearn |
@@ -50,7 +50,7 @@ Once the cheat sheets feel familiar, spend most of your time in `06_mocks/` (see
 3. `04_sklearn/01`, `03`, `04` (workflow, time-series CV, diagnostics).
 4. `07_optimisation/01`, `02`, `05` (dispatch LP, battery, imbalance decisions) — the Fuse-specific modelling.
 5. `02_pandas/08` (debugging toolkit), `02_pandas/10` (pdb inside a notebook), `02_pandas/09` (half-hourly settlement & panels), `05_time_series_research/05` (data quality) — the "attention to detail" material.
-6. `03_scipy/03`–`04` (standard errors, bootstrap, hypothesis tests, power) and `05_time_series_research/07` (statistical traps) — for the "is this result real?" questions.
+6. `03_scipy/00` (statistics from scratch, read this first if the maths feels hazy), then `03_scipy/03`–`04` (bootstrap, hypothesis tests, power) and `05_time_series_research/07` (statistical traps) — for the "is this result real?" questions.
 7. `01_numpy/*`, `02_pandas/03`–`05`, `03_scipy/01`–`02`, `04_sklearn/02`, `04_sklearn/05`, `05_time_series_research/04`, `06`, `07_optimisation/03`, `04`, `06` as reference.
 
 ## Data
