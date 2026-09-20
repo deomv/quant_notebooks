@@ -94,6 +94,7 @@ QUESTIONS = [
         setup="rng = np.random.default_rng(2)",
         solution="x = rng.normal(0.2, 1.0, size=(5000, 50))\nt = x.mean(axis=1) / (x.std(axis=1, ddof=1) / np.sqrt(50))\npower = (t > stats.t.ppf(0.95, df=49)).mean()",
         hint="Row-wise mean and std (axis=1, ddof=1); the critical value is stats.t.ppf(0.95, 49).",
+        answer_var="power",
         tol=1e-9,
     ),
     dict(
@@ -117,6 +118,7 @@ QUESTIONS = [
         setup='df = pd.read_csv("../data/hourly_power_clean.csv", parse_dates=["time"]).set_index("time")\ncons = df["consumption_mwh"]',
         solution='e24 = (cons - cons.shift(24)).abs().loc["2023"].resample("D").mean()\ne168 = (cons - cons.shift(168)).abs().loc["2023"].resample("D").mean()\nt_paired = stats.ttest_rel(e24, e168).statistic',
         hint="Build both daily MAE series on the full data, then restrict to 2023 and resample('D').mean(); stats.ttest_rel on the two aligned series.",
+        answer_var="t_paired",
         tol=1e-4,
     ),
     dict(
