@@ -107,7 +107,7 @@ Empirical quantiles of train residuals, checked for coverage on test, or quantil
 ## 4. Statistics
 
 **Standard deviation vs standard error?**
-SD describes the spread of the data; SE describes the spread of an estimate across repeated samples (σ/√n for a mean). SD does not shrink with n, SE does. → `03_scipy/03`
+Four distinct things: the population sd σ (true spread of individual observations), the sample sd s (your estimate of σ from n points), the variance of the sample mean σ²/n (how much x̄ would move across repeated samples), and its square root the standard error σ/√n, estimated by s/√n. The sample sd does not shrink with n; the standard error does. → `03_scipy/00`, `03_scipy/03`
 
 **What does a 95% confidence interval mean?**
 Under repetition of the procedure, 95% of such intervals contain the true value. It is a statement about the procedure, not a 95% probability for this particular interval. → `03_scipy/03`
